@@ -1,0 +1,32 @@
+Bootstrap: docker
+From: ubuntu:22.04
+
+
+%post
+apt-get -y update
+export DEBIAN_FRONTEND=noninteractive
+apt-get -y install bash unzip python-is-python3 python3.10-venv python3-tk openjdk-11-jdk environment-modules build-essential maven python3 git wget
+mkdir -p /sw/da_tracker/
+git clone https://github.com/jaugenst/da_tracker.git /sw/da_tracker/202404/
+wget https://downloads.imagej.net/fiji/archive/20240418-1417/fiji-linux64.zip
+unzip fiji-linux64.zip -d /sw/da_tracker/202404/
+cd /sw/da_tracker/202404/Fiji.app/
+./ImageJ-linux64 --update add-update-sites "TrackMate-Cellpose" "https://sites.imagej.net/TrackMate-Cellpose/" 
+./ImageJ-linux64 --update update
+cd ..
+python3 -mvenv .
+. bin/activate
+export PATH="/sw/da_tracker/202404/bin"
+export VIRTUAL_ENV="/sw/da_tracker/202404"
+pip install cellpose pyimagej jupyterlab geopandas seaborn
+
+
+%environment
+export JAVA_HOME=/sw/da_tracker/202404/Fiji.app/java/linux-amd64/zulu8.60.0.21-ca-fx-jdk8.0.322-linux_x64/jre
+export PATH=$PATH:/sw/da_tracker/202404/Fiji.app/java/linux-amd64/zulu8.60.0.21-ca-fx-jdk8.0.322-linux_x64/jre/bin
+
+
+%runscript
+cd /sw/da_tracker
+. 202404/bin/activate
+jupyter-lab
